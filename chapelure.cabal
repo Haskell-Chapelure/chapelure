@@ -73,6 +73,8 @@ library
     , text                         ^>=1.2
     , text-display                 ^>=0.0
     , vector                       ^>=0.12
+    , base    ^>=4.14
+    , vector  ^>=0.12
 
 test-suite chapelure-test
   import:         common-extensions
