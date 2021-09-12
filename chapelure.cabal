@@ -58,9 +58,10 @@ library
   hs-source-dirs:  src
   exposed-modules: Chapelure.Types
   build-depends:
-    , base    ^>=4.14.1
-    , text
+    , base    ^>=4.14 || ^>= 4.15
+    , text    ^>=1.2
     , vector  ^>=0.12.1
+    , pretty-terminal ^>= 0.1
 
 test-suite chapelure-test
   import:         common-extensions
