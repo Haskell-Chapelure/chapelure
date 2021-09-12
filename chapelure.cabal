@@ -32,11 +32,13 @@ common common-extensions
     KindSignatures
     MultiParamTypeClasses
     NamedFieldPuns
+    OverloadedLabels
     OverloadedStrings
     RankNTypes
     RecordWildCards
     ScopedTypeVariables
     StandaloneDeriving
+    StrictData
     TypeApplications
     TypeOperators
 
@@ -56,11 +58,21 @@ library
   import:          common-extensions
   import:          common-ghc-options
   hs-source-dirs:  src
-  exposed-modules: Chapelure.Types
+  exposed-modules:
+    Chapelure
+    Chapelure.Errors
+    Chapelure.Handler.PlainText
+    Chapelure.Types
+
   build-depends:
-    , base    ^>=4.14 || ^>= 4.15
-    , text
-    , vector  ^>=0.12.1
+    , base                         >=4.14 && <4.17
+    , containers                   ^>=0.6
+    , nonempty-vector              ^>=0.2
+    , optics-core                  ^>=0.4
+    , prettyprinter                ^>=1.7
+    , text                         ^>=1.2
+    , text-display                 ^>=0.0
+    , vector                       ^>=0.12
 
 test-suite chapelure-test
   import:         common-extensions
@@ -73,5 +85,9 @@ test-suite chapelure-test
     , base
     , chapelure
     , hspec
+    , nonempty-vector
+    , string-qq
+    , text
+    , vector
 
   other-modules:
