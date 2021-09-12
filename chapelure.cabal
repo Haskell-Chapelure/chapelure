@@ -1,0 +1,77 @@
+cabal-version:      3.0
+name:               chapelure
+version:            0.0.1.0
+homepage:           https://github.com/Kleidukos/chapelure#readme
+bug-reports:        https://github.com/Kleidukos/chapelure/issues
+author:             Hécate Moonlight
+maintainer:         Hécate Moonlight
+license:            MIT
+build-type:         Simple
+extra-source-files:
+  CHANGELOG.md
+  LICENSE.md
+  README.md
+
+source-repository head
+  type:     git
+  location: https://github.com/Kleidukos/chapelure
+
+common common-extensions
+  default-extensions:
+    ConstraintKinds
+    DataKinds
+    DeriveAnyClass
+    DeriveGeneric
+    DerivingStrategies
+    DerivingVia
+    DuplicateRecordFields
+    FlexibleContexts
+    FlexibleInstances
+    GeneralizedNewtypeDeriving
+    InstanceSigs
+    KindSignatures
+    MultiParamTypeClasses
+    NamedFieldPuns
+    OverloadedStrings
+    RankNTypes
+    RecordWildCards
+    ScopedTypeVariables
+    StandaloneDeriving
+    TypeApplications
+    TypeOperators
+
+  default-language:   Haskell2010
+
+common common-ghc-options
+  ghc-options:
+    -Wall -Wcompat -Werror -Widentities -Wincomplete-record-updates
+    -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
+    -fhide-source-paths -Wno-unused-do-bind -fwrite-ide-info
+    -hiedir=.hie -haddock -j
+
+common common-rts-options
+  ghc-options: -rtsopts -threaded -with-rtsopts=-N
+
+library
+  import:          common-extensions
+  import:          common-ghc-options
+  hs-source-dirs:  src
+  exposed-modules: Chapelure.Types
+  build-depends:
+    , base    ^>=4.14.1
+    , text
+    , vector  ^>=0.12.1
+
+test-suite chapelure-test
+  import:         common-extensions
+  import:         common-ghc-options
+  import:         common-rts-options
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: test
+  build-depends:
+    , base
+    , chapelure
+    , hspec
+
+  other-modules:

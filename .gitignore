@@ -1,0 +1,8 @@
+dist*
+.hie
+cabal.project.local*
+Session.vim
+.hspec-failures
+<
+tags
+tags.mtime
