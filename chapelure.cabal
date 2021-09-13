@@ -58,7 +58,7 @@ library
   hs-source-dirs:  src
   exposed-modules: Chapelure.Types
   build-depends:
-    , base    ^>=4.14 || ^>= 4.15
+    , base    ^>=4.14.1
     , text
     , vector  ^>=0.12.1
 
