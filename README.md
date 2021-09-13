@@ -10,6 +10,11 @@
 $ cabal build 
 ```
 
+## Acknowledgements
+
+* Kat Marchán
+* Geoffroy Couprie
+
 [simple-haskell]: https://img.shields.io/badge/Simple-Haskell-purple?style=flat-square
 [miette]: https://github.com/zkat/miette
 [kat's twitter]: https://twitter.com/zkat__
