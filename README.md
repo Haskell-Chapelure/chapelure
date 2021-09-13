@@ -10,13 +10,6 @@
 $ cabal build 
 ```
 
-## Acknowledgements
-
-* Kat Marchán
-* Geoffroy Couprie
-
 [simple-haskell]: https://img.shields.io/badge/Simple-Haskell-purple?style=flat-square
 [miette]: https://github.com/zkat/miette
 [kat's twitter]: https://twitter.com/zkat__
-[CI-badge]: https://img.shields.io/github/workflow/status/haskell-chapelure/chapelure/CI?style=flat-square
-[CI-url]: https://github.com/haskell-chapelure/chapelure/actions
