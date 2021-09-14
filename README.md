@@ -1,4 +1,4 @@
-# Chapelure ![CI-badge][CI-badge]][CI-url] ![simple-haskell][simple-haskell]
+# Chapelure [![CI-badge][CI-badge]][CI-url] ![simple-haskell][simple-haskell]
 
 ## Description
 
