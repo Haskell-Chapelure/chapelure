@@ -65,16 +65,14 @@ library
     Chapelure.Types
 
   build-depends:
-    , base                         >=4.14 && <4.17
-    , containers                   ^>=0.6
-    , nonempty-vector              ^>=0.2
-    , optics-core                  ^>=0.4
-    , prettyprinter                ^>=1.7
-    , text                         ^>=1.2
-    , text-display                 ^>=0.0
-    , vector                       ^>=0.12
-    , base    ^>=4.14
-    , vector  ^>=0.12
+    , base             ^>=4.14
+    , containers       ^>=0.6
+    , nonempty-vector  ^>=0.2
+    , optics-core      ^>=0.4
+    , prettyprinter    ^>=1.7
+    , text             ^>=1.2
+    , text-display     ^>=0.0
+    , vector           ^>=0.12
 
 test-suite chapelure-test
   import:         common-extensions
