@@ -101,7 +101,7 @@ checkHighlight Source{label, startColumn=(Column startColLine), endColumn=(Colum
     _  -> Nothing
 
 -- | >>> mkPointer Source{ label = Just "Foobar", line = Line 3, startColumn = Column 7, endColumn = Column 10 }
---            ^ Foobar^ Foobar^ Foobar
+--
 mkPointer :: Source -> Doc ()
 mkPointer s =
   let Source{line, label, startColumn=(Column startColLine), endColumn=(Column endColLine)} = s
