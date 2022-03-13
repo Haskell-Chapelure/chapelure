@@ -1,0 +1,6 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: "library:chapelure"
+    - path: "./test"
+      component: "test-suite:chapelure-test"

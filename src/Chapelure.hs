@@ -1,10 +1,9 @@
 module Chapelure where
 
-import qualified Data.Text.IO as T
+import Chapelure.Handler.Colourful (Config, layoutOptions, render)
+import Chapelure.Style (putDocText)
 import Chapelure.Types
-import Data.Text
+import Prettyprinter (layoutPretty)
 
-displayRender :: Diagnostic -- ^ Diagnostic to render
-              -> (Diagnostic -> Text) -- ^ Rendering function
-              -> IO ()
-displayRender diagnostic renderer = T.putStrLn $ renderer diagnostic
+displayDiagnostic :: Config -> Diagnostic -> IO ()
+displayDiagnostic config diagnostic = putDocText $ layoutPretty (layoutOptions config) $ render config diagnostic
