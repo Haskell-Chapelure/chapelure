@@ -6,3 +6,5 @@ Session.vim
 <
 tags
 tags.mtime
+.direnv/
+.envrc

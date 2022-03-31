@@ -16,34 +16,37 @@ $ cabal build
 You can provide snippets to be annotated and highlighted:
 
 ```
-Diagnostic severity: Error                          
-                                                    
--> Code.hs:3:1                                      
-3 │ add :: Int                                      
-           ^^^ Return type is an “Int”              
-4 │ add = 1 + True                                  
-              ^^^^ You tried to pass a “Bool”       
-                                                    
-Help: Did you check all the types of your arguments?
-Code: L342                                          
-Link: https://localhost:8888/help/code/L342
+[L342]: Error: 
+ ╭[Code.hs:3:1] 
+ │ 
+3│ add :: Int
+ │        ╰┬╯
+ │         ╰ Return type is an “Int”
+4│ add = 1 + True
+ │           ╰┬─╯
+ │            ╰ You tried to pass a “Bool”
+ │ Did you check all the types of your arguments?
+ │ https://localhost:8888/help/code/L342
+ ╯ 
 ```
 
 And you can even put multiple highlights per line:
 
 ```
-Diagnostic severity: Error
- 
--> Code.hs:3:1
-3 │ add :: Int
-           ^^^ Return type is “Int”
-4 │ add = 1 + True
-              ^^^^ But you passed a “Bool”
-            ^ This takes an “Int”
-
-Help: Did you check all the types of your arguments?
-Code: L342
-Link: https://localhost:8888/help/code/L342
+[L342]: Error: 
+ ╭[Code.hs:3:1] 
+ │ 
+3│ add :: Int
+ │        ╰┬╯
+ │         ╰ Return type is “Int”
+4│ add = 1 + True
+ │         ┬
+ │         ╰ This takes an “Int”
+ │           ╰┬─╯
+ │            ╰ But you passed a “Bool”
+ │ Did you check all the types of your arguments?
+ │ https://localhost:8888/help/code/L342
+ ╯ 
 ```
 
 To generate such a diagnostic, build the appropriate structures and pass it to the renderer:
@@ -57,17 +60,17 @@ let helpMessage = "Did you check all the types of your arguments?"
 let highlights = NEVec.fromList [
            Source{ label = Just "Return type is “Int”"
                  , line = Line 3
-                 , startColumn = Column 7
+                 , startColumn = Column 8
                  , endColumn = Column 10
                  }
          , Source{ label = Just "This takes an “Int”"
                  , line = Line 4
-                 , startColumn = Column 8
-                 , endColumn = Column 8
+                 , startColumn = Column 9
+                 , endColumn = Column 9
                  }
          , Source{ label = Just "But you passed a “Bool”"
                  , line = Line 4
-                 , startColumn = Column 10
+                 , startColumn = Column 11
                  , endColumn = Column 14
                  }
         ]
@@ -82,6 +85,10 @@ let diagnostic = Diagnostic { code = Just "L342"
                             , snippets = Just . NEVec.singleton $ snip
                             }
 ```
+
+It even outputs in colour!
+
+![Colourful terminal output](./screenshots/chapelureprogress8.png)
 
 ## Acknowledgements
 
