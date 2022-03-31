@@ -60,7 +60,7 @@ library
   hs-source-dirs:  src
   exposed-modules:
     Chapelure
-    Chapelure.Errors
+    --Chapelure.Errors
     Chapelure.Handler.Colourful
     Chapelure.Types
     Chapelure.Style
@@ -91,6 +91,7 @@ test-suite chapelure-test
     , chapelure
     , hspec
     , nonempty-vector
+    , prettyprinter
     , string-qq
     , text
     , vector

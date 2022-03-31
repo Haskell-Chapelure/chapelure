@@ -15,9 +15,9 @@ data Diagnostic = Diagnostic
     -- | Diagnostic severity, this may be used by the Report Handler
     -- to adapt the formatting of the diagnostic.
     severity :: Severity,
-    -- | A short description of the diagnostic
+    -- | A short description of the diagnostic. Rendered at the top.
     message :: Maybe DocText,
-    -- | Additional free-form text for the poor bastard at the end of it all.
+    -- | Additional free-form text for the poor bastard at the end of it all. Rendered at the bottom
     help :: Maybe DocText,
     -- | Link to visit for a more detailed explanation.
     -- Can make use of the 'code' component.
@@ -38,7 +38,7 @@ data Severity
     (Display)
     via (ShowInstance Severity)
 
--- | Wrapper to mark an offset from the beginning of a 'Source'.
+-- | Wrapper to mark an offset from the beginning of a 'Highlight'.
 newtype Offset = Offset Word
   deriving stock (Eq, Show, Generic)
   deriving newtype (Ord, Enum, Pretty)

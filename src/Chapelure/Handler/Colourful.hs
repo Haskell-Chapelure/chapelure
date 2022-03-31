@@ -5,15 +5,14 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TupleSections #-}
 
+-- | A pretty renderer for 'Diagnostic's. Can optionally render in color
 module Chapelure.Handler.Colourful (render, Config (..), prettyConfig, asciiColorConfig, asciiPlainConfig) where
 
 import Chapelure.Style
   ( DocText,
     Style,
     StyleColor (Color16, Color256, ColorRGB),
-    putDocText,
     styleFG,
-    styleItalicized,
     styleUnderline,
   )
 import Chapelure.Types
@@ -24,7 +23,6 @@ import Chapelure.Types
     Severity (Error, Info, Warning),
     Snippet (Snippet),
   )
-import Control.Arrow ((>>>))
 import Data.Bifunctor (Bifunctor (first))
 import Data.Colour (Colour, colourConvert)
 import Data.Fixed (mod')
@@ -52,8 +50,8 @@ import HSLuv
     hsluvToColour,
   )
 import Optics.Core ((<&>))
-import Prettyprinter (LayoutOptions (LayoutOptions, layoutPageWidth), PageWidth (AvailablePerLine, Unbounded), Pretty (pretty), SimpleDocStream (..), annotate, brackets, defaultLayoutOptions, hardline, indent, layoutPretty, space)
-import System.Console.ANSI (Color (Blue, Cyan, Red, Yellow), ColorIntensity (Vivid), ConsoleLayer (Foreground), SGR (SetRGBColor), Underlining (SingleUnderline), setSGR, xterm24LevelGray)
+import Prettyprinter (LayoutOptions (LayoutOptions, layoutPageWidth), PageWidth (AvailablePerLine, Unbounded), Pretty (pretty), SimpleDocStream (..), annotate, brackets, hardline, indent, layoutPretty, space)
+import System.Console.ANSI (Color (Blue, Red, Yellow), ColorIntensity (Vivid), Underlining (SingleUnderline), xterm24LevelGray)
 
 -- Color generation
 -- https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
@@ -70,6 +68,7 @@ headMempty :: Monoid a => [a] -> a
 headMempty [] = mempty
 headMempty (a : _as) = a
 
+-- | Configuration for rendering
 data Config = Config
   { tabWidth :: !Word,
     layoutOptions :: !LayoutOptions,
@@ -77,6 +76,7 @@ data Config = Config
     warningStyle :: !Style,
     errorStyle :: !Style,
     gutterStyle :: !Style,
+    linkStyle :: !Style,
     colourizeHighlights :: !Bool,
     gutterVLine :: !Char,
     gutterVBreak :: !Char,
@@ -103,6 +103,7 @@ data Config = Config
   }
 
 prettyConfig, asciiColorConfig, asciiPlainConfig :: Config
+-- | A pretty rendering configuration, making use of color and Unicode box-drawing characters
 prettyConfig =
   Config
     { tabWidth = 4,
@@ -111,6 +112,7 @@ prettyConfig =
       warningStyle = styleFG $ Color16 Vivid Yellow,
       errorStyle = styleFG $ Color16 Vivid Red,
       gutterStyle = styleFG (Color256 $ xterm24LevelGray 12),
+      linkStyle = styleUnderline SingleUnderline,
       colourizeHighlights = True,
       gutterVLine = '│',
       gutterVBreak = '┆',
@@ -135,6 +137,7 @@ prettyConfig =
       highlightCornerTop = '╭',
       highlightCornerBottom = '╰'
     }
+-- | A colorful ASCII rendering configuration
 asciiColorConfig =
   prettyConfig
     { gutterVLine = '|',
@@ -155,12 +158,14 @@ asciiColorConfig =
       highlightCornerTop = '/',
       highlightCornerBottom = '\\'
     }
+-- | A plain ASCII rendering configuration. Useful if the terminal supports neither colour nor box-drawing characters
 asciiPlainConfig =
   asciiColorConfig
     { infoStyle = mempty,
       warningStyle = mempty,
       errorStyle = mempty,
       gutterStyle = mempty,
+      linkStyle = mempty,
       colourizeHighlights = False
     }
 
@@ -266,19 +271,19 @@ renderLine config pad (RenderLine g ms co rc conn) =
               <> pretty (gutterCornerFoot config)
 
     goMulti :: [MultiSpan] -> Word -> DocText
-    goMulti ms co =
+    goMulti ms' co' =
       let (hl, docs) =
             mapAccumL
-              ( \hl -> \case
-                  NoMulti -> (hl, maybe space (\st -> annotate st $ pretty (highlightHConnector config)) hl)
-                  Vee st -> (hl, annotate st $ pretty (highlightConnector config))
+              ( \hl' -> \case
+                  NoMulti -> (hl', maybe space (\st -> annotate st $ pretty (highlightHConnector config)) hl')
+                  Vee st -> (hl', annotate st $ pretty (highlightConnector config))
                   Tee st TeeTop -> (Just st, annotate st $ pretty (highlightCornerTop config))
                   Tee st TeeMid -> (Just st, annotate st $ pretty (highlightHTee config))
                   Tee st TeeBottom -> (Just st, annotate st $ pretty (highlightCornerBottom config))
               )
               Nothing
-              ms
-       in fold docs <> stimes co (maybe space (\st -> annotate st $ pretty (highlightHConnector config)) hl)
+              ms'
+       in fold docs <> stimes co' (maybe space (\st -> annotate st $ pretty (highlightHConnector config)) hl)
 
     goContent :: [(Text, Style)] -> DocText
     goContent = foldMap (\(t, s) -> annotate s (pretty t))
@@ -310,12 +315,13 @@ buildGutter lo s e lines' = (fromIntegral pad, body)
       Seq.zip [s .. e] (Seq.fromList $ toList lines') >>= \(i, line) ->
         fmap (\r -> RenderLine (Numbered i) [] 0 r Nothing) (buildDoc padded line)
 
-buildGutter' :: LayoutOptions -> Maybe Text -> Line -> Column -> Line -> Vector DocText -> Maybe DocText -> Maybe Text -> (Word, Seq RenderLine)
-buildGutter' lo source s sc e lines' me li =
+buildGutter' :: Bool -> Style -> LayoutOptions -> Maybe Text -> Line -> Column -> Line -> Vector DocText -> Maybe DocText -> Maybe Text -> (Word, Seq RenderLine)
+buildGutter' isFinal linkStyle lo source s sc e lines' me li =
   ( pad,
     go (Header source s sc) :<| go HeaderSpace
-      :<| ( bg <> ((\l -> RenderLine (Unnumbered (Just FooterInfo)) [] 0 l Nothing) <$> buildDoc lo (fromMaybe mempty me))
-              <> maybe mempty (\link -> [RenderLine (Unnumbered (Just FooterInfo)) [] 0 [(link, styleUnderline SingleUnderline)] Nothing]) li :|> go Footer
+      :<| ( bg
+              <> if not isFinal then mempty else ((\l -> RenderLine (Unnumbered (Just FooterInfo)) [] 0 l Nothing) <$> buildDoc lo (fromMaybe mempty me))
+              <> if not isFinal then mempty else maybe mempty (\link -> [RenderLine (Unnumbered (Just FooterInfo)) [] 0 [(link, linkStyle)] Nothing]) li :|> go Footer
           )
   )
   where
@@ -391,6 +397,7 @@ underlineHighlight config highlights = Seq.fromList $ highlights >>= go
        in RenderLine (Unnumbered Nothing) [] (cs' - 1) [(underline, st)] Nothing :
           (z <&> \(conn, l) -> RenderLine (if isJust conn then Unnumbered sem else Unnumbered Nothing) [] mid l ((st,) <$> conn))
 
+-- | Renders a 'Diagnostic' using the provided 'Config' into a 'DocText'.
 render :: Config -> Diagnostic -> DocText
 render config (Diagnostic co se me he li snip) =
   let sgr = case se of
@@ -406,16 +413,21 @@ render config (Diagnostic co se me he li snip) =
       mess = fromMaybe mempty me <> hardline
       snips :: Vector Snippet
       snips = maybe mempty DVNE.toVector snip
-      body = foldMap go snips
-   in fromMaybe mempty code <> label' <> mess <> body
+      body = foldMap go (zip [0..] (toList snips))
+      inCaseNoSnippets = maybe showFooter (const mempty) snip
+   in fromMaybe mempty code <> label' <> mess <> body <> inCaseNoSnippets
   where
-    go (Snippet (source, ln@(Line ln'), col) highlights' lines') =
+    showFooter = foldMap (foldMap (\(t, s) -> annotate s (pretty t) <> hardline)) $
+        buildDoc (layoutOptions config) (fromMaybe mempty he)
+           <> maybe mempty (\link -> [[(link, linkStyle config)]]) li
+
+    go (i, Snippet (source, ln@(Line ln'), col) highlights' lines') =
       foldMap
         (renderLine config pad)
         ( renderMulti $
             fullGutter >>= \rl ->
               case gutter rl of
-                Numbered li -> rl :<| maybe mempty (underlineHighlight config) (Map.lookup li highlights)
+                Numbered li' -> rl :<| maybe mempty (underlineHighlight config) (Map.lookup li' highlights)
                 _ -> [rl]
         )
       where
@@ -431,19 +443,19 @@ render config (Diagnostic co se me he li snip) =
           fromList' $
             concatMap
               ( \(name, (style, Highlight label' spans)) ->
-                  ( \(i :: Integer, (l, cs, ce)) ->
+                  ( \(j :: Integer, (l, cs, ce)) ->
                       ( l,
                         RenderHighlight
                           cs
                           ce
                           style
                           if
-                              | DVNE.length spans >= 2, i == fromIntegral (DVNE.length spans - 1) -> MultiEnd label'
+                              | DVNE.length spans >= 2, j == fromIntegral (DVNE.length spans - 1) -> MultiEnd label'
                               | DVNE.length spans >= 2 -> Multi
                               | otherwise -> Single label'
                           if
-                              | i == 0 -> Just $ FirstConnectorFor name
-                              | i == fromIntegral (DVNE.length spans - 1) -> Just $ LastConnectorFor name
+                              | j == 0 -> Just $ FirstConnectorFor name
+                              | j == fromIntegral (DVNE.length spans - 1) -> Just $ LastConnectorFor name
                               | otherwise -> Just $ MidConnectorFor name
                       )
                   )
@@ -452,7 +464,7 @@ render config (Diagnostic co se me he li snip) =
               (zip [0 ..] hls)
 
         multilineHighlights :: [((Int, Style), [(Line, Column, Column)])]
-        multilineHighlights = mapMaybe (\(i, (st, hi)) -> if DVNE.length (spans hi) >= 2 then Just ((i, st), toList (spans hi)) else Nothing) (zip [0 ..] hls)
+        multilineHighlights = mapMaybe (\(k, (st, hi)) -> if DVNE.length (spans hi) >= 2 then Just ((k, st), toList (spans hi)) else Nothing) (zip [0 ..] hls)
         multilineHighlights' :: [Map Line [(Column, Column)]]
         multilineHighlights' = fmap (fromList' . fmap (\(l, cs, ce) -> (l, (cs, ce))) . snd) multilineHighlights
         multilineHighlights'' :: [Set Line]
@@ -466,26 +478,26 @@ render config (Diagnostic co se me he li snip) =
         multilineHighlights''' :: [((Int, Style), Set Line)]
         multilineHighlights''' = zip (fmap fst multilineHighlights) multilineHighlights''
 
-        (pad, gutter') = buildGutter' (layoutOptions config) source ln col (Line $ ln' + fromIntegral (V.length lines')) lines' he li
+        (pad, gutter') = buildGutter' (i == maybe 0 DVNE.length snip - 1) (linkStyle config) (layoutOptions config) source ln col (Line $ ln' + fromIntegral (V.length lines')) lines' he li
 
         forget = fmap (\(RenderHighlight cs ce st _ _) -> (cs, ce, st))
         hlGutter =
           gutter' <&> \rl -> case gutter rl of
-            Numbered li -> rl {renderedContent = maybe id highlightSpans (forget <$> Map.lookup li highlights) $ renderedContent rl}
+            Numbered li' -> rl {renderedContent = maybe id highlightSpans (forget <$> Map.lookup li' highlights) $ renderedContent rl}
             _ -> rl
         fullGutter = if colourizeHighlights config then hlGutter else gutter'
 
         renderMulti :: Seq RenderLine -> Seq RenderLine
         renderMulti s =
           foldr
-            ( \((i, st), ls) ls' ->
+            ( \((i', st), _ls) ls' ->
                 snd $
                   mapAccumL
                     ( \isStyled rl ->
                         let (isStyled', c) = case gutter rl of
-                              Unnumbered (Just (FirstConnectorFor j)) | i == j -> (True, Tee st TeeTop)
-                              Unnumbered (Just (MidConnectorFor j)) | i == j -> (True, Tee st TeeMid)
-                              Unnumbered (Just (LastConnectorFor j)) | i == j -> (False, Tee st TeeBottom)
+                              Unnumbered (Just (FirstConnectorFor j)) | i' == j -> (True, Tee st TeeTop)
+                              Unnumbered (Just (MidConnectorFor j)) | i' == j -> (True, Tee st TeeMid)
+                              Unnumbered (Just (LastConnectorFor j)) | i' == j -> (False, Tee st TeeBottom)
                               Unnumbered (Just FooterInfo) -> (False, NoMulti)
                               Footer -> (False, NoMulti)
                               _ -> (isStyled, if isStyled then Vee st else NoMulti)
@@ -498,93 +510,93 @@ render config (Diagnostic co se me he li snip) =
             multilineHighlights'''
 
 -- ──────────────────────────────── Testing ──────────────────────────────── --
-colourTest :: IO ()
-colourTest = go (zip (spacedColors 75.0) (words "This is a colour test! Fugiat excepturi illo nihil porro voluptatem. Repellendus velit quibusdam aut dolorem. Quis non ipsa qui molestiae explicabo quos. Sed dolorum laborum expedita exercitationem sit quaerat veniam culpa. Voluptas quas molestiae earum delectus veniam officia ut ut. Cupiditate tenetur libero quibusdam maiores ea. Est consequuntur perferendis est optio officia aliquid ratione. Velit hic eaque qui voluptatibus ipsam. Rem facilis temporibus corporis quia perferendis. Commodi vero laborum esse voluptas est numquam. Laudantium fuga aliquam repudiandae explicabo ut dolores beatae. Pariatur et provident consequatur optio neque asperiores voluptatem necessitatibus. Iusto nam sint et. Non qui cupiditate porro corporis qui. Dignissimos voluptates iusto dolor. Itaque minus et sed qui non quidem. Perspiciatis omnis id eaque. Quis rerum architecto magni qui iure nisi voluptatum. Omnis esse pariatur pariatur non. Fugiat provident voluptate maxime cupiditate unde consequatur at id. Praesentium molestiae consectetur sequi dolor qui nulla vel fuga. Enim aut assumenda recusandae. Et quisquam architecto quasi aut nihil unde et dolores. Delectus qui esse sapiente ut. Eum ut quis expedita reprehenderit et nihil odio sint. Molestias quidem iusto delectus est consequatur voluptas possimus. Neque reiciendis maiores cumque a non nihil."))
-  where
-    go :: [(Colour Double, String)] -> IO ()
-    go [] = putStrLn "" >> setSGR []
-    go ((c, s) : rest) = do
-      setSGR [SetRGBColor Foreground (colourConvert c)]
-      putStr s
-      putStr " "
-      go rest
+-- colourTest :: IO ()
+-- colourTest = go (zip (spacedColors 75.0) (words "This is a colour test! Fugiat excepturi illo nihil porro voluptatem. Repellendus velit quibusdam aut dolorem. Quis non ipsa qui molestiae explicabo quos. Sed dolorum laborum expedita exercitationem sit quaerat veniam culpa. Voluptas quas molestiae earum delectus veniam officia ut ut. Cupiditate tenetur libero quibusdam maiores ea. Est consequuntur perferendis est optio officia aliquid ratione. Velit hic eaque qui voluptatibus ipsam. Rem facilis temporibus corporis quia perferendis. Commodi vero laborum esse voluptas est numquam. Laudantium fuga aliquam repudiandae explicabo ut dolores beatae. Pariatur et provident consequatur optio neque asperiores voluptatem necessitatibus. Iusto nam sint et. Non qui cupiditate porro corporis qui. Dignissimos voluptates iusto dolor. Itaque minus et sed qui non quidem. Perspiciatis omnis id eaque. Quis rerum architecto magni qui iure nisi voluptatum. Omnis esse pariatur pariatur non. Fugiat provident voluptate maxime cupiditate unde consequatur at id. Praesentium molestiae consectetur sequi dolor qui nulla vel fuga. Enim aut assumenda recusandae. Et quisquam architecto quasi aut nihil unde et dolores. Delectus qui esse sapiente ut. Eum ut quis expedita reprehenderit et nihil odio sint. Molestias quidem iusto delectus est consequatur voluptas possimus. Neque reiciendis maiores cumque a non nihil."))
+--   where
+--     go :: [(Colour Double, String)] -> IO ()
+--     go [] = putStrLn "" >> setSGR []
+--     go ((c, s) : rest) = do
+--       setSGR [SetRGBColor Foreground (colourConvert c)]
+--       putStr s
+--       putStr " "
+--       go rest
 
-displayDiag :: Diagnostic -> IO ()
-displayDiag = render asciiColorConfig >>> layoutPretty defaultLayoutOptions >>> putDocText
+-- displayDiag :: Diagnostic -> IO ()
+-- displayDiag = render asciiColorConfig >>> layoutPretty defaultLayoutOptions >>> putDocText
 
-testDiag :: Diagnostic
-testDiag =
-  Diagnostic
-    (Just "E0001")
-    Error
-    (Just "Found a bug!")
-    (Just "Note: your code is broken!")
-    (Just "https://sofia.sofia")
-    ( DVNE.fromVector
-        [ Snippet
-            (Just "sofia.ð", Line 99, Column 1)
-            ( DVNE.fromVector
-                [ Highlight (Just "unrecognized type 'imt'") (DVNE.singleton (Line 99, Column 13, Column 15)),
-                  Highlight
-                    (Just "note: maybe you mean 'int' to match with y?")
-                    ( DVNE.singleton (Line 100, Column 9, Column 13) <> DVNE.singleton (Line 101, Column 9, Column 9)
-                    )
-                ]
-            )
-            [ "def blah(x: imt): int",
-              "        y = x",
-              "        y"
-            ]
-        ]
-    )
+-- testDiag :: Diagnostic
+-- testDiag =
+--   Diagnostic
+--     (Just "E0001")
+--     Error
+--     (Just "Found a bug!")
+--     (Just "Note: your code is broken!")
+--     (Just "https://sofia.sofia")
+--     ( DVNE.fromVector
+--         [ Snippet
+--             (Just "sofia.ð", Line 99, Column 1)
+--             ( DVNE.fromVector
+--                 [ Highlight (Just "unrecognized type 'imt'") (DVNE.singleton (Line 99, Column 13, Column 15)),
+--                   Highlight
+--                     (Just "note: maybe you mean 'int' to match with y?")
+--                     ( DVNE.singleton (Line 100, Column 9, Column 13) <> DVNE.singleton (Line 101, Column 9, Column 9)
+--                     )
+--                 ]
+--             )
+--             [ "def blah(x: imt): int",
+--               "        y = x",
+--               "        y"
+--             ]
+--         ]
+--     )
 
-testDiag2 :: Diagnostic
-testDiag2 =
-  Diagnostic
-    (Just "E0002")
-    Info
-    (Just $ "Edge case " <> annotate (styleItalicized True) "testing!")
-    (Just ("Note: we can have " <> annotate (styleFG (Color16 Vivid Cyan)) "colors!"))
-    (Just "https://sofia.sofia")
-    ( DVNE.fromVector
-        [ Snippet
-            (Just "sofia.ð", Line 99999, Column 1)
-            ( DVNE.fromVector
-                [ Highlight (Just "small label") (DVNE.singleton (Line 99999, Column 1, Column 2)),
-                  Highlight
-                    (Just "overlap")
-                    ( DVNE.singleton (Line 100000, Column 1, Column 4) <> DVNE.singleton (Line 100000, Column 3, Column 7)
-                    )
-                ]
-            )
-            [ "tiny",
-              "overlap"
-            ]
-        ]
-    )
+-- testDiag2 :: Diagnostic
+-- testDiag2 =
+--   Diagnostic
+--     (Just "E0002")
+--     Info
+--     (Just $ "Edge case " <> annotate (styleItalicized True) "testing!")
+--     (Just ("Note: we can have " <> annotate (styleFG (Color16 Vivid Cyan)) "colors!"))
+--     (Just "https://sofia.sofia")
+--     ( DVNE.fromVector
+--         [ Snippet
+--             (Just "sofia.ð", Line 99999, Column 1)
+--             ( DVNE.fromVector
+--                 [ Highlight (Just "small label") (DVNE.singleton (Line 99999, Column 1, Column 2)),
+--                   Highlight
+--                     (Just "overlap")
+--                     ( DVNE.singleton (Line 100000, Column 1, Column 4) <> DVNE.singleton (Line 100000, Column 3, Column 7)
+--                     )
+--                 ]
+--             )
+--             [ "tiny",
+--               "overlap"
+--             ]
+--         ]
+--     )
 
-testDiag3 :: Diagnostic
-testDiag3 =
-  Diagnostic
-    (Just "E0003")
-    Info
-    Nothing
-    Nothing
-    Nothing
-    ( DVNE.fromVector
-        [ Snippet
-            (Nothing, Line 9, Column 1)
-            ( DVNE.fromVector
-                [ Highlight (Just "overlapping 1") (DVNE.singleton (Line 9, Column 1, Column 4) <> DVNE.singleton (Line 10, Column 1, Column 4)),
-                  Highlight (Just "overlapping 2") (DVNE.singleton (Line 10, Column 1, Column 4) <> DVNE.singleton (Line 11, Column 1, Column 4)),
-                  Highlight (Just "overlapping 3") (DVNE.singleton (Line 9, Column 1, Column 4) <> DVNE.singleton (Line 12, Column 1, Column 4) <> DVNE.singleton (Line 13, Column 1, Column 4))
-                ]
-            )
-            [ "blah",
-              "blaz",
-              "sofi",
-              "bing",
-              "cute"
-            ]
-        ]
-    )
+-- testDiag3 :: Diagnostic
+-- testDiag3 =
+--   Diagnostic
+--     (Just "E0003")
+--     Info
+--     Nothing
+--     Nothing
+--     Nothing
+--     ( DVNE.fromVector
+--         [ Snippet
+--             (Nothing, Line 9, Column 1)
+--             ( DVNE.fromVector
+--                 [ Highlight (Just "overlapping 1") (DVNE.singleton (Line 9, Column 1, Column 4) <> DVNE.singleton (Line 10, Column 1, Column 4)),
+--                   Highlight (Just "overlapping 2") (DVNE.singleton (Line 10, Column 1, Column 4) <> DVNE.singleton (Line 11, Column 1, Column 4)),
+--                   Highlight (Just "overlapping 3") (DVNE.singleton (Line 9, Column 1, Column 4) <> DVNE.singleton (Line 12, Column 1, Column 4) <> DVNE.singleton (Line 13, Column 1, Column 4))
+--                 ]
+--             )
+--             [ "blah",
+--               "blaz",
+--               "sofi",
+--               "bing",
+--               "cute"
+--             ]
+--         ]
+--     )
