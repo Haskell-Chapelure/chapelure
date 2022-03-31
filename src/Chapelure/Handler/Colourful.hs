@@ -1,12 +1,18 @@
--- todo: there are terminal escape codes for marking URLs
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TupleSections #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 -- | A pretty renderer for 'Diagnostic's. Can optionally render in color
-module Chapelure.Handler.Colourful (render, Config (..), prettyConfig, asciiColorConfig, asciiPlainConfig) where
+module Chapelure.Handler.Colourful
+  ( render
+  , Config (..)
+  , prettyConfig
+  , asciiColorConfig
+  , asciiPlainConfig
+  ) where
 
 import Chapelure.Style
   ( DocText,
