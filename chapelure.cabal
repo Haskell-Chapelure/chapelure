@@ -5,11 +5,14 @@ homepage:           https://github.com/Kleidukos/chapelure#readme
 bug-reports:        https://github.com/Kleidukos/chapelure/issues
 author:             Hécate Moonlight
 maintainer:         Hécate Moonlight
+category:           Pretty Printer
+synopsis:           A diagnostics library for Haskell
+description:        Chapelure is a diagnostics library for Haskell.
 license:            MIT
 build-type:         Simple
 extra-source-files:
   CHANGELOG.md
-  LICENSE.md
+  LICENSE
   README.md
 
 source-repository head
@@ -49,7 +52,7 @@ common common-ghc-options
     -Wall -Wcompat -Widentities -Wincomplete-record-updates
     -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
     -fhide-source-paths -Wno-unused-do-bind -fwrite-ide-info
-    -hiedir=.hie -haddock -j
+    -hiedir=.hie -haddock 
 
 common common-rts-options
   ghc-options: -rtsopts -threaded -with-rtsopts=-N
