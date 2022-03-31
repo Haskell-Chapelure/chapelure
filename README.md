@@ -86,7 +86,9 @@ let diagnostic = Diagnostic { code = Just "L342"
                             }
 ```
 
-![It outputs in colour, too](./screenshots/chapelureprogress8.png)
+It even outputs in colour!
+
+![Colourful terminal output](./screenshots/chapelureprogress8.png)
 
 ## Acknowledgements
 

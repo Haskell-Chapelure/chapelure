@@ -15,10 +15,8 @@ import Chapelure
 main :: IO ()
 main = hspec spec
 
-
-
-test :: IO ()
-test =  let helpMessage = "Did you check all the types of your arguments?" in
+testForScreenshot :: IO ()
+testForScreenshot =  let helpMessage = "Did you check all the types of your arguments?" in
         let highlights = NEVec.fromList [
                    Highlight{ label = Just "Return type is “Int”"
                          , spans = NEVec.singleton (Line 3, Column 8, Column 10)
