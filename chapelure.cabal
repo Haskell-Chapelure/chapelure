@@ -1,8 +1,8 @@
 cabal-version:      3.0
 name:               chapelure
 version:            0.0.1.0
-homepage:           https://github.com/Kleidukos/chapelure#readme
-bug-reports:        https://github.com/Kleidukos/chapelure/issues
+homepage:           https://github.com/haskell-chapelure/chapelure#readme
+bug-reports:        https://github.com/haskell-chapelure/chapelure/issues
 author:             Hécate Moonlight
 maintainer:         Hécate Moonlight
 category:           Pretty Printer
@@ -17,7 +17,7 @@ extra-source-files:
 
 source-repository head
   type:     git
-  location: https://github.com/Kleidukos/chapelure
+  location: https://github.com/haskell-chapelure/chapelure
 
 common common-extensions
   default-extensions:
