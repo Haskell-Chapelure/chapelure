@@ -1,8 +1,12 @@
-module Chapelure where
+module Chapelure
+  ( Diagnostic(..)
+  , displayDiagnostic
+  , displayDiagnosticAsString
+  ) where
 
 import Chapelure.Handler.Colourful (Config, layoutOptions, render)
 import Chapelure.Style (putDocText, renderDoc)
-import Chapelure.Types
+import Chapelure.Types (Diagnostic(..))
 import Data.Text (Text)
 import Prettyprinter (layoutPretty)
 

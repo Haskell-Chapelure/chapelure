@@ -1,5 +1,7 @@
 # Chapelure [![CI-badge][CI-badge]][CI-url] ![simple-haskell][simple-haskell]
 
+⚠  The 0.0.\* series is experimental.
+
 ## Description
 
 `chapelure` is a diagnostic library for Haskell, based on the [`miette`][miette] library by [Kat Marchán][kat's twitter]
