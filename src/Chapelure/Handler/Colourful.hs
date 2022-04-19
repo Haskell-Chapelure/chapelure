@@ -370,27 +370,30 @@ data RenderHighlight = RenderHighlight
     hiEnd :: Column,
     hiStyle :: Style,
     multiKind :: MultiKind,
-    hiSem :: Maybe Semantic
+    hiSem :: Maybe Semantic,
+    shouldLabel :: Bool
   }
 
 underlineHighlight :: Config -> [RenderHighlight] -> Seq RenderLine
 underlineHighlight config highlights = Seq.fromList $ highlights >>= go
   where
-    go (RenderHighlight (Column cs') (Column ce') st mk sem) =
+    go (RenderHighlight (Column cs') (Column ce') st mk sem sl) =
       let mid = (cs' + ce') `div` 2
           underline =
             if
-                | ce' == cs' -> T.singleton $ highlightUnderDown config
-                | ce' == cs' + 1 -> T.singleton (highlightTwospan config) <> T.singleton (highlightUnderRight config)
+                | ce' == cs' -> if sl then T.singleton $ highlightUnderDown config else T.singleton $ highlightUnder config
+                | ce' == cs' + 1 -> (if sl
+                    then T.singleton (highlightTwospan config)
+                    else T.singleton (highlightUnderLeft config)) <> T.singleton (highlightUnderRight config)
                 | otherwise ->
                   T.singleton (highlightUnderLeft config)
                     <> T.replicate (fromIntegral $ mid - cs' - 1) (T.singleton $ highlightUnder config)
-                    <> T.singleton (highlightUnderDown config)
+                    <> if sl then T.singleton $ highlightUnderDown config else T.singleton (highlightUnder config)
                     <> T.replicate (fromIntegral $ ce' - mid - 1) (T.singleton $ highlightUnder config)
                     <> T.singleton (highlightUnderRight config)
           connector
             | Multi <- mk = MultiConnector
-            | MultiEnd _ <- mk = MultiEndConnector
+            | MultiEnd _ <- mk = if sl then MultiEndConnector else MultiConnector
             | Unbounded <- layoutPageWidth (layoutOptions config) = RightConnector
             | AvailablePerLine n _x <- layoutPageWidth $ layoutOptions config,
               n `div` 2 > fromIntegral mid =
@@ -401,8 +404,11 @@ underlineHighlight config highlights = Seq.fromList $ highlights >>= go
             Multi -> Nothing
             MultiEnd d -> d
           z = zip (Just connector : repeat Nothing) (toList (buildDoc (layoutOptions config) (annotate st $ fromMaybe mempty t)))
+          z' = z <&> \(conn, l) -> RenderLine (if isJust conn then Unnumbered sem else Unnumbered Nothing) [] mid l ((st,) <$> conn)
        in RenderLine (Unnumbered Nothing) [] (cs' - 1) [(underline, st)] Nothing :
-          (z <&> \(conn, l) -> RenderLine (if isJust conn then Unnumbered sem else Unnumbered Nothing) [] mid l ((st,) <$> conn))
+          (if | Single _ <- mk, not sl -> []
+              | otherwise -> z'
+            )
 
 -- | Renders a 'Diagnostic' using the provided 'Config' into a 'DocText'.
 render :: Config -> Diagnostic -> DocText
@@ -464,6 +470,7 @@ render config (Diagnostic co se me he li snip) =
                               | j == 0 -> Just $ FirstConnectorFor name
                               | j == fromIntegral (DVNE.length spans - 1) -> Just $ LastConnectorFor name
                               | otherwise -> Just $ MidConnectorFor name
+                          (isJust label')
                       )
                   )
                     <$> zip [0 ..] (toList spans)
@@ -487,7 +494,7 @@ render config (Diagnostic co se me he li snip) =
 
         (pad, gutter') = buildGutter' (i == maybe 0 DVNE.length snip - 1) (linkStyle config) (layoutOptions config) source ln col (Line $ ln' + fromIntegral (V.length lines')) lines' he li
 
-        forget = fmap (\(RenderHighlight cs ce st _ _) -> (cs, ce, st))
+        forget = fmap (\(RenderHighlight cs ce st _ _ _) -> (cs, ce, st))
         hlGutter =
           gutter' <&> \rl -> case gutter rl of
             Numbered li' -> rl {renderedContent = maybe id highlightSpans (forget <$> Map.lookup li' highlights) $ renderedContent rl}
@@ -604,6 +611,31 @@ render config (Diagnostic co se me he li snip) =
 --               "sofi",
 --               "bing",
 --               "cute"
+--             ]
+--         ]
+--     )
+
+-- testDiag4 :: Diagnostic
+-- testDiag4 =
+--   Diagnostic
+--     (Just "E0004")
+--     Error
+--     (Just "Found a bug!")
+--     (Just "Note: your code is broken!")
+--     (Just "https://sofia.sofia")
+--     ( DVNE.fromVector
+--         [ Snippet
+--             (Just "sofia.ð", Line 99, Column 1)
+--             ( DVNE.fromVector
+--                 [ Highlight Nothing (DVNE.singleton (Line 99, Column 1, Column 4))
+--                 , Highlight Nothing (DVNE.singleton (Line 100, Column 1, Column 1))
+--                 , Highlight Nothing (DVNE.singleton (Line 101, Column 1, Column 2))
+--                 , Highlight Nothing (DVNE.singleton (Line 101, Column 4, Column 5))
+--                 ]
+--             )
+--             [ "test",
+--               ".",
+--               "ab cd"
 --             ]
 --         ]
 --     )
