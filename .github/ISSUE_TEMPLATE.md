@@ -1,5 +1,5 @@
-* chapelure version:
-* Python version:
+* Chapelure version:
+* GHC version:
 * Operating System:
 
 ### Description
@@ -9,7 +9,4 @@ Tell us what happened, what went wrong, and what you expected to happen.
 
 ### What I Did
 
-```
-Paste the command(s) you ran and the output.
-If there was a crash, please include the traceback here.
-```
+Please include stand-alone reproducer.
