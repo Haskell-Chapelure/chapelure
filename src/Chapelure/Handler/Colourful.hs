@@ -381,14 +381,14 @@ underlineHighlight config highlights = Seq.fromList $ highlights >>= go
       let mid = (cs' + ce') `div` 2
           underline =
             if
-                | ce' == cs' -> if sl then T.singleton $ highlightUnderDown config else T.singleton $ highlightUnder config
+                | ce' == cs' -> if sl then T.singleton (highlightUnderDown config) else T.singleton (highlightUnder config)
                 | ce' == cs' + 1 -> (if sl
                     then T.singleton (highlightTwospan config)
                     else T.singleton (highlightUnderLeft config)) <> T.singleton (highlightUnderRight config)
                 | otherwise ->
                   T.singleton (highlightUnderLeft config)
                     <> T.replicate (fromIntegral $ mid - cs' - 1) (T.singleton $ highlightUnder config)
-                    <> if sl then T.singleton $ highlightUnderDown config else T.singleton (highlightUnder config)
+                    <> (if sl then T.singleton (highlightUnderDown config) else T.singleton (highlightUnder config))
                     <> T.replicate (fromIntegral $ ce' - mid - 1) (T.singleton $ highlightUnder config)
                     <> T.singleton (highlightUnderRight config)
           connector
