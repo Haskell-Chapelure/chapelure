@@ -37,6 +37,7 @@ common common-extensions
     MultiParamTypeClasses
     NamedFieldPuns
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     RankNTypes
     RecordWildCards
@@ -46,7 +47,7 @@ common common-extensions
     TypeApplications
     TypeOperators
 
-  default-language:   Haskell2010
+  default-language:   GHC2021
 
 common common-ghc-options
   ghc-options:

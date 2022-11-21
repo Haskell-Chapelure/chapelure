@@ -10,7 +10,7 @@ import Prettyprinter (pretty)
 import Test.Hspec
 
 import Chapelure
-import qualified Chapelure.Handler.Colourful as PT
+import Chapelure.Handler.Colourful qualified as PT
 import Chapelure.Types
 
 main :: IO ()

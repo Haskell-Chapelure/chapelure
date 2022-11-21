@@ -33,21 +33,22 @@ import Data.Bifunctor (Bifunctor (first))
 import Data.Colour (Colour, colourConvert)
 import Data.Fixed (mod')
 import Data.Foldable (Foldable (fold), toList)
+import Data.Functor ((<&>))
 import Data.List (mapAccumL)
 import Data.Map (Map)
-import qualified Data.Map as Map
+import Data.Map qualified as Map
 import Data.Maybe (fromMaybe, isJust, mapMaybe)
 import Data.Semigroup (Semigroup (stimes))
 import Data.Sequence (Seq (..))
-import qualified Data.Sequence as Seq
+import Data.Sequence qualified as Seq
 import Data.Set (Set)
-import qualified Data.Set as Set
+import Data.Set qualified as Set
 import Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text qualified as T
 import Data.Text.Display (display)
 import Data.Vector (Vector)
-import qualified Data.Vector as V
-import qualified Data.Vector.NonEmpty as DVNE
+import Data.Vector qualified as V
+import Data.Vector.NonEmpty qualified as DVNE
 import HSLuv
   ( HSLuv (HSLuv)
   , HSLuvHue (HSLuvHue)
@@ -55,8 +56,18 @@ import HSLuv
   , HSLuvSaturation (HSLuvSaturation)
   , hsluvToColour
   )
-import Optics.Core ((<&>))
-import Prettyprinter (LayoutOptions (LayoutOptions, layoutPageWidth), PageWidth (AvailablePerLine, Unbounded), Pretty (pretty), SimpleDocStream (..), annotate, brackets, hardline, indent, layoutPretty, space)
+import Prettyprinter
+  ( LayoutOptions (LayoutOptions, layoutPageWidth)
+  , PageWidth (AvailablePerLine, Unbounded)
+  , Pretty (pretty)
+  , SimpleDocStream (..)
+  , annotate
+  , brackets
+  , hardline
+  , indent
+  , layoutPretty
+  , space
+  )
 import System.Console.ANSI (Color (Blue, Red, Yellow), ColorIntensity (Vivid), Underlining (SingleUnderline), xterm24LevelGray)
 
 -- Color generation
