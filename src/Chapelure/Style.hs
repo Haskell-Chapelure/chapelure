@@ -6,7 +6,7 @@ module Chapelure.Style where
 
 import Control.Applicative ((<|>))
 import Data.Colour (Colour)
-import Data.Maybe (catMaybes, listToMaybe, fromMaybe)
+import Data.Maybe (catMaybes, fromMaybe, listToMaybe)
 import Data.Text qualified as T
 import Data.Text.IO qualified as T
 import Data.Word (Word8)
@@ -16,12 +16,12 @@ import System.IO (Handle)
 
 -- | A collection of style information. Implements 'Monoid'
 data Style = Style
-  { _intensity :: !(Maybe ConsoleIntensity),
-    _italicize :: !(Maybe Bool),
-    _underline :: !(Maybe Underlining),
-    _negative :: !(Maybe Bool),
-    _colorFG :: !(Maybe StyleColor),
-    _colorBG :: !(Maybe StyleColor)
+  { _intensity :: !(Maybe ConsoleIntensity)
+  , _italicize :: !(Maybe Bool)
+  , _underline :: !(Maybe Underlining)
+  , _negative :: !(Maybe Bool)
+  , _colorFG :: !(Maybe StyleColor)
+  , _colorBG :: !(Maybe StyleColor)
   }
   deriving (Show, Eq)
 
@@ -59,12 +59,12 @@ instance Monoid Style where
 -- | Various kinds of colors that can be used in a terminal
 data StyleColor
   = ColorDefault
-  -- | A 16-colour palette: 8 hues and 2 intensities. The most commonly supported form of terminal colouring
-  | Color16 !ColorIntensity !Color
-  -- | A fixed 256-color palette
-  | Color256 !Word8
-  -- | Full 24-bit true colors
-  | ColorRGB !(Colour Float)
+  | -- | A 16-colour palette: 8 hues and 2 intensities. The most commonly supported form of terminal colouring
+    Color16 !ColorIntensity !Color
+  | -- | A fixed 256-color palette
+    Color256 !Word8
+  | -- | Full 24-bit true colors
+    ColorRGB !(Colour Float)
   deriving (Show, Eq)
 
 -- | Styled, pretty-printed 'Doc'uments
@@ -74,12 +74,12 @@ type DocText = Doc Style
 toSGR :: Style -> [SGR]
 toSGR (Style is it un ne fg bg) =
   catMaybes
-    [ SetConsoleIntensity <$> is,
-      SetItalicized <$> it,
-      SetUnderlining <$> un,
-      SetSwapForegroundBackground <$> ne,
-      go Foreground <$> fg,
-      go Background <$> bg
+    [ SetConsoleIntensity <$> is
+    , SetItalicized <$> it
+    , SetUnderlining <$> un
+    , SetSwapForegroundBackground <$> ne
+    , go Foreground <$> fg
+    , go Background <$> bg
     ]
   where
     go :: ConsoleLayer -> StyleColor -> SGR
@@ -112,9 +112,10 @@ renderDoc = go []
       SChar c sds -> T.singleton c <> go st sds
       SText _n txt sds -> txt <> go st sds
       SLine n sds -> T.singleton '\n' <> T.replicate n (T.singleton ' ') <> go st sds
-      SAnnPush st' sds -> if st' == mempty
-        then go (Nothing : st) sds
-        else T.pack (setStyleCode (fromMaybe mempty (fromMaybe mempty (listToMaybe st)) <> st')) <> go (Just st' : st) sds
+      SAnnPush st' sds ->
+        if st' == mempty
+          then go (Nothing : st) sds
+          else T.pack (setStyleCode (fromMaybe mempty (fromMaybe mempty (listToMaybe st)) <> st')) <> go (Just st' : st) sds
       SAnnPop sds -> case st of
         [] -> go [] sds
         [Nothing] -> go [] sds
@@ -133,11 +134,12 @@ putDocText = go []
       SChar c sds -> putChar c >> go st sds
       SText _n txt sds -> T.putStr txt >> go st sds
       SLine n sds -> putChar '\n' >> T.putStr (T.replicate n (T.singleton ' ')) >> go st sds
-      SAnnPush st' sds -> if st' == mempty
-        then go (Nothing : st) sds
-        else do
-          setStyle (fromMaybe mempty (fromMaybe mempty (listToMaybe st)) <> st')
-          go (Just st' : st) sds
+      SAnnPush st' sds ->
+        if st' == mempty
+          then go (Nothing : st) sds
+          else do
+            setStyle (fromMaybe mempty (fromMaybe mempty (listToMaybe st)) <> st')
+            go (Just st' : st) sds
       SAnnPop sds -> case st of
         [] -> go [] sds
         [Nothing] -> go [] sds

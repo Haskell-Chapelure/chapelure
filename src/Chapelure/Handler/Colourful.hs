@@ -15,19 +15,19 @@ module Chapelure.Handler.Colourful
   ) where
 
 import Chapelure.Style
-  ( DocText,
-    Style,
-    StyleColor (Color16, Color256, ColorRGB),
-    styleFG,
-    styleUnderline,
+  ( DocText
+  , Style
+  , StyleColor (Color16, Color256, ColorRGB)
+  , styleFG
+  , styleUnderline
   )
 import Chapelure.Types
-  ( Column (..),
-    Diagnostic (Diagnostic),
-    Highlight (Highlight, spans),
-    Line (..),
-    Severity (Error, Info, Warning),
-    Snippet (Snippet),
+  ( Column (..)
+  , Diagnostic (Diagnostic)
+  , Highlight (Highlight, spans)
+  , Line (..)
+  , Severity (Error, Info, Warning)
+  , Snippet (Snippet)
   )
 import Data.Bifunctor (Bifunctor (first))
 import Data.Colour (Colour, colourConvert)
@@ -49,11 +49,11 @@ import Data.Vector (Vector)
 import qualified Data.Vector as V
 import qualified Data.Vector.NonEmpty as DVNE
 import HSLuv
-  ( HSLuv (HSLuv),
-    HSLuvHue (HSLuvHue),
-    HSLuvLightness (HSLuvLightness),
-    HSLuvSaturation (HSLuvSaturation),
-    hsluvToColour,
+  ( HSLuv (HSLuv)
+  , HSLuvHue (HSLuvHue)
+  , HSLuvLightness (HSLuvLightness)
+  , HSLuvSaturation (HSLuvSaturation)
+  , hsluvToColour
   )
 import Optics.Core ((<&>))
 import Prettyprinter (LayoutOptions (LayoutOptions, layoutPageWidth), PageWidth (AvailablePerLine, Unbounded), Pretty (pretty), SimpleDocStream (..), annotate, brackets, hardline, indent, layoutPretty, space)
@@ -76,103 +76,106 @@ headMempty (a : _as) = a
 
 -- | Configuration for rendering
 data Config = Config
-  { tabWidth :: !Word,
-    layoutOptions :: !LayoutOptions,
-    infoStyle :: !Style,
-    warningStyle :: !Style,
-    errorStyle :: !Style,
-    gutterStyle :: !Style,
-    linkStyle :: !Style,
-    colourizeHighlights :: !Bool,
-    gutterVLine :: !Char,
-    gutterVBreak :: !Char,
-    gutterHLineHead :: !Char,
-    gutterHLineFoot :: !Char,
-    gutterCornerHead :: !Char,
-    gutterCornerFoot :: !Char,
-    locationLeftBracket :: !Text,
-    locationRightBracket :: !Text,
-    locationSeparator :: !Text,
-    highlightUnderLeft :: !Char,
-    highlightUnderRight :: !Char,
-    highlightUnder :: !Char,
-    highlightUnderDown :: !Char,
-    highlightTwospan :: !Char,
-    highlightConnector :: !Char,
-    highlightConnectionLeft :: !Char,
-    highlightConnectionRight :: !Char,
-    highlightHConnector :: !Char,
-    highlightHTee :: !Char,
-    highlightLabelTee :: !Char,
-    highlightCornerTop :: !Char,
-    highlightCornerBottom :: !Char
+  { tabWidth :: !Word
+  , layoutOptions :: !LayoutOptions
+  , infoStyle :: !Style
+  , warningStyle :: !Style
+  , errorStyle :: !Style
+  , gutterStyle :: !Style
+  , linkStyle :: !Style
+  , colourizeHighlights :: !Bool
+  , gutterVLine :: !Char
+  , gutterVBreak :: !Char
+  , gutterHLineHead :: !Char
+  , gutterHLineFoot :: !Char
+  , gutterCornerHead :: !Char
+  , gutterCornerFoot :: !Char
+  , locationLeftBracket :: !Text
+  , locationRightBracket :: !Text
+  , locationSeparator :: !Text
+  , highlightUnderLeft :: !Char
+  , highlightUnderRight :: !Char
+  , highlightUnder :: !Char
+  , highlightUnderDown :: !Char
+  , highlightTwospan :: !Char
+  , highlightConnector :: !Char
+  , highlightConnectionLeft :: !Char
+  , highlightConnectionRight :: !Char
+  , highlightHConnector :: !Char
+  , highlightHTee :: !Char
+  , highlightLabelTee :: !Char
+  , highlightCornerTop :: !Char
+  , highlightCornerBottom :: !Char
   }
 
 prettyConfig, asciiColorConfig, asciiPlainConfig :: Config
+
 -- | A pretty rendering configuration, making use of color and Unicode box-drawing characters
 prettyConfig =
   Config
-    { tabWidth = 4,
-      layoutOptions = LayoutOptions (AvailablePerLine 80 1.0),
-      infoStyle = styleFG $ Color16 Vivid Blue,
-      warningStyle = styleFG $ Color16 Vivid Yellow,
-      errorStyle = styleFG $ Color16 Vivid Red,
-      gutterStyle = styleFG (Color256 $ xterm24LevelGray 12),
-      linkStyle = styleUnderline SingleUnderline,
-      colourizeHighlights = True,
-      gutterVLine = '│',
-      gutterVBreak = '┆',
-      gutterHLineHead = ' ',
-      gutterHLineFoot = ' ',
-      gutterCornerHead = '╭',
-      gutterCornerFoot = '╯',
-      locationLeftBracket = "[",
-      locationRightBracket = "]",
-      locationSeparator = ":",
-      highlightUnderLeft = '╰',
-      highlightUnderRight = '╯',
-      highlightUnder = '─',
-      highlightUnderDown = '┬',
-      highlightTwospan = '├',
-      highlightConnector = '│',
-      highlightConnectionLeft = '╯',
-      highlightConnectionRight = '╰',
-      highlightHConnector = '─',
-      highlightHTee = '├',
-      highlightLabelTee = '┴',
-      highlightCornerTop = '╭',
-      highlightCornerBottom = '╰'
+    { tabWidth = 4
+    , layoutOptions = LayoutOptions (AvailablePerLine 80 1.0)
+    , infoStyle = styleFG $ Color16 Vivid Blue
+    , warningStyle = styleFG $ Color16 Vivid Yellow
+    , errorStyle = styleFG $ Color16 Vivid Red
+    , gutterStyle = styleFG (Color256 $ xterm24LevelGray 12)
+    , linkStyle = styleUnderline SingleUnderline
+    , colourizeHighlights = True
+    , gutterVLine = '│'
+    , gutterVBreak = '┆'
+    , gutterHLineHead = ' '
+    , gutterHLineFoot = ' '
+    , gutterCornerHead = '╭'
+    , gutterCornerFoot = '╯'
+    , locationLeftBracket = "["
+    , locationRightBracket = "]"
+    , locationSeparator = ":"
+    , highlightUnderLeft = '╰'
+    , highlightUnderRight = '╯'
+    , highlightUnder = '─'
+    , highlightUnderDown = '┬'
+    , highlightTwospan = '├'
+    , highlightConnector = '│'
+    , highlightConnectionLeft = '╯'
+    , highlightConnectionRight = '╰'
+    , highlightHConnector = '─'
+    , highlightHTee = '├'
+    , highlightLabelTee = '┴'
+    , highlightCornerTop = '╭'
+    , highlightCornerBottom = '╰'
     }
+
 -- | A colorful ASCII rendering configuration
 asciiColorConfig =
   prettyConfig
-    { gutterVLine = '|',
-      gutterVBreak = ':',
-      gutterCornerHead = '/',
-      gutterCornerFoot = '/',
-      highlightUnderLeft = '^',
-      highlightUnderRight = '^',
-      highlightUnder = '^',
-      highlightUnderDown = '^',
-      highlightTwospan = '^',
-      highlightConnector = '|',
-      highlightConnectionLeft = '/',
-      highlightConnectionRight = '\\',
-      highlightHConnector = '-',
-      highlightHTee = '|',
-      highlightLabelTee = '*',
-      highlightCornerTop = '/',
-      highlightCornerBottom = '\\'
+    { gutterVLine = '|'
+    , gutterVBreak = ':'
+    , gutterCornerHead = '/'
+    , gutterCornerFoot = '/'
+    , highlightUnderLeft = '^'
+    , highlightUnderRight = '^'
+    , highlightUnder = '^'
+    , highlightUnderDown = '^'
+    , highlightTwospan = '^'
+    , highlightConnector = '|'
+    , highlightConnectionLeft = '/'
+    , highlightConnectionRight = '\\'
+    , highlightHConnector = '-'
+    , highlightHTee = '|'
+    , highlightLabelTee = '*'
+    , highlightCornerTop = '/'
+    , highlightCornerBottom = '\\'
     }
+
 -- | A plain ASCII rendering configuration. Useful if the terminal supports neither colour nor box-drawing characters
 asciiPlainConfig =
   asciiColorConfig
-    { infoStyle = mempty,
-      warningStyle = mempty,
-      errorStyle = mempty,
-      gutterStyle = mempty,
-      linkStyle = mempty,
-      colourizeHighlights = False
+    { infoStyle = mempty
+    , warningStyle = mempty
+    , errorStyle = mempty
+    , gutterStyle = mempty
+    , linkStyle = mempty
+    , colourizeHighlights = False
     }
 
 -- | What to render at the left of the line
@@ -229,11 +232,11 @@ data Connector
 
 -- | How to render a particular line, and the line's semantics
 data RenderLine = RenderLine
-  { gutter :: Gutter,
-    multispans :: [MultiSpan],
-    contentOffset :: Word,
-    renderedContent :: [(Text, Style)],
-    connector :: Maybe (Style, Connector)
+  { gutter :: Gutter
+  , multispans :: [MultiSpan]
+  , contentOffset :: Word
+  , renderedContent :: [(Text, Style)]
+  , connector :: Maybe (Style, Connector)
   }
 
 renderLine :: Config -> Word -> RenderLine -> DocText
@@ -323,11 +326,15 @@ buildGutter lo s e lines' = (fromIntegral pad, body)
 
 buildGutter' :: Bool -> Style -> LayoutOptions -> Maybe Text -> Line -> Column -> Line -> Vector DocText -> Maybe DocText -> Maybe Text -> (Word, Seq RenderLine)
 buildGutter' isFinal linkStyle lo source s sc e lines' me li =
-  ( pad,
-    go (Header source s sc) :<| go HeaderSpace
+  ( pad
+  , go (Header source s sc)
+      :<| go HeaderSpace
       :<| ( bg
-              <> if not isFinal then mempty else ((\l -> RenderLine (Unnumbered (Just FooterInfo)) [] 0 l Nothing) <$> buildDoc lo (fromMaybe mempty me))
-              <> if not isFinal then mempty else maybe mempty (\link -> [RenderLine (Unnumbered (Just FooterInfo)) [] 0 [(link, linkStyle)] Nothing]) li :|> go Footer
+              <> if not isFinal
+                then mempty
+                else
+                  ((\l -> RenderLine (Unnumbered (Just FooterInfo)) [] 0 l Nothing) <$> buildDoc lo (fromMaybe mempty me))
+                    <> if not isFinal then mempty else maybe mempty (\link -> [RenderLine (Unnumbered (Just FooterInfo)) [] 0 [(link, linkStyle)] Nothing]) li :|> go Footer
           )
   )
   where
@@ -350,8 +357,8 @@ highlightSpans hls = go 1
 
     go' :: Word -> (Char, Style) -> (Char, Style)
     go' col (c, s) =
-      ( c,
-        s
+      ( c
+      , s
           <> fold
             ( mapMaybe
                 (\(s', e, st) -> if s' <= Column col && Column col <= e then Just st else Nothing)
@@ -365,11 +372,11 @@ data MultiKind
   | MultiEnd (Maybe DocText)
 
 data RenderHighlight = RenderHighlight
-  { hiStart :: Column,
-    hiEnd :: Column,
-    hiStyle :: Style,
-    multiKind :: MultiKind,
-    hiSem :: Maybe Semantic
+  { hiStart :: Column
+  , hiEnd :: Column
+  , hiStyle :: Style
+  , multiKind :: MultiKind
+  , hiSem :: Maybe Semantic
   }
 
 underlineHighlight :: Config -> [RenderHighlight] -> Seq RenderLine
@@ -382,26 +389,26 @@ underlineHighlight config highlights = Seq.fromList $ highlights >>= go
                 | ce' == cs' -> T.singleton $ highlightUnderDown config
                 | ce' == cs' + 1 -> T.singleton (highlightTwospan config) <> T.singleton (highlightUnderRight config)
                 | otherwise ->
-                  T.singleton (highlightUnderLeft config)
-                    <> T.replicate (fromIntegral $ mid - cs' - 1) (T.singleton $ highlightUnder config)
-                    <> T.singleton (highlightUnderDown config)
-                    <> T.replicate (fromIntegral $ ce' - mid - 1) (T.singleton $ highlightUnder config)
-                    <> T.singleton (highlightUnderRight config)
+                    T.singleton (highlightUnderLeft config)
+                      <> T.replicate (fromIntegral $ mid - cs' - 1) (T.singleton $ highlightUnder config)
+                      <> T.singleton (highlightUnderDown config)
+                      <> T.replicate (fromIntegral $ ce' - mid - 1) (T.singleton $ highlightUnder config)
+                      <> T.singleton (highlightUnderRight config)
           connector
             | Multi <- mk = MultiConnector
             | MultiEnd _ <- mk = MultiEndConnector
             | Unbounded <- layoutPageWidth (layoutOptions config) = RightConnector
-            | AvailablePerLine n _x <- layoutPageWidth $ layoutOptions config,
-              n `div` 2 > fromIntegral mid =
-              RightConnector
+            | AvailablePerLine n _x <- layoutPageWidth $ layoutOptions config
+            , n `div` 2 > fromIntegral mid =
+                RightConnector
             | otherwise = LeftConnector
           t = case mk of
             Single d -> d
             Multi -> Nothing
             MultiEnd d -> d
           z = zip (Just connector : repeat Nothing) (toList (buildDoc (layoutOptions config) (annotate st $ fromMaybe mempty t)))
-       in RenderLine (Unnumbered Nothing) [] (cs' - 1) [(underline, st)] Nothing :
-          (z <&> \(conn, l) -> RenderLine (if isJust conn then Unnumbered sem else Unnumbered Nothing) [] mid l ((st,) <$> conn))
+       in RenderLine (Unnumbered Nothing) [] (cs' - 1) [(underline, st)] Nothing
+            : (z <&> \(conn, l) -> RenderLine (if isJust conn then Unnumbered sem else Unnumbered Nothing) [] mid l ((st,) <$> conn))
 
 -- | Renders a 'Diagnostic' using the provided 'Config' into a 'DocText'.
 render :: Config -> Diagnostic -> DocText
@@ -419,13 +426,14 @@ render config (Diagnostic co se me he li snip) =
       mess = fromMaybe mempty me <> hardline
       snips :: Vector Snippet
       snips = maybe mempty DVNE.toVector snip
-      body = foldMap go (zip [0..] (toList snips))
+      body = foldMap go (zip [0 ..] (toList snips))
       inCaseNoSnippets = maybe showFooter (const mempty) snip
    in fromMaybe mempty code <> label' <> mess <> body <> inCaseNoSnippets
   where
-    showFooter = foldMap (foldMap (\(t, s) -> annotate s (pretty t) <> hardline)) $
+    showFooter =
+      foldMap (foldMap (\(t, s) -> annotate s (pretty t) <> hardline)) $
         buildDoc (layoutOptions config) (fromMaybe mempty he)
-           <> maybe mempty (\link -> [[(link, linkStyle config)]]) li
+          <> maybe mempty (\link -> [[(link, linkStyle config)]]) li
 
     go (i, Snippet (source, ln@(Line ln'), col) highlights' lines') =
       foldMap
@@ -450,8 +458,8 @@ render config (Diagnostic co se me he li snip) =
             concatMap
               ( \(name, (style, Highlight label' spans)) ->
                   ( \(j :: Integer, (l, cs, ce)) ->
-                      ( l,
-                        RenderHighlight
+                      ( l
+                      , RenderHighlight
                           cs
                           ce
                           style
@@ -489,7 +497,7 @@ render config (Diagnostic co se me he li snip) =
         forget = fmap (\(RenderHighlight cs ce st _ _) -> (cs, ce, st))
         hlGutter =
           gutter' <&> \rl -> case gutter rl of
-            Numbered li' -> rl {renderedContent = maybe id highlightSpans (forget <$> Map.lookup li' highlights) $ renderedContent rl}
+            Numbered li' -> rl{renderedContent = maybe id (highlightSpans . forget) (Map.lookup li' highlights) $ renderedContent rl}
             _ -> rl
         fullGutter = if colourizeHighlights config then hlGutter else gutter'
 
@@ -507,7 +515,7 @@ render config (Diagnostic co se me he li snip) =
                               Unnumbered (Just FooterInfo) -> (False, NoMulti)
                               Footer -> (False, NoMulti)
                               _ -> (isStyled, if isStyled then Vee st else NoMulti)
-                         in (isStyled', rl {multispans = c : multispans rl})
+                         in (isStyled', rl{multispans = c : multispans rl})
                     )
                     False
                     ls'

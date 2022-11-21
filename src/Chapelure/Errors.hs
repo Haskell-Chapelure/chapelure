@@ -20,10 +20,10 @@ data ChapelureError
 toDiagnostic :: ChapelureError -> Diagnostic
 toDiagnostic (SpanOutOfBounds label (start, end)) =
   Diagnostic
-    { code = Just "OutOfBoundsError",
-      severity = Error,
-      message = Nothing,
-      help = Just $ pretty $ "Bounds errors on snippet for “" <> label <> "”. Check that the 'startColumn' and 'endColumn' bounds " <> display (start, end) <> "are correct",
-      link = Nothing,
-      snippets = Nothing
+    { code = Just "OutOfBoundsError"
+    , severity = Error
+    , message = Nothing
+    , help = Just $ pretty $ "Bounds errors on snippet for “" <> label <> "”. Check that the 'startColumn' and 'endColumn' bounds " <> display (start, end) <> "are correct"
+    , link = Nothing
+    , snippets = Nothing
     }

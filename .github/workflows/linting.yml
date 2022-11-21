@@ -1,0 +1,33 @@
+name: Linting
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+jobs:
+  fourmolu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: fourmolu/fourmolu-action@v5
+      with:
+        pattern: |
+          app/**/*.hs
+
+  hlint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: 'Set up HLint'
+      uses: rwe/actions-hlint-setup@v1
+      with:
+        version: '3.5'
+
+    - name: 'Run HLint'
+      uses: rwe/actions-hlint-run@v1
+      with:
+        path: '["app/"]'
+        fail-on: warning
