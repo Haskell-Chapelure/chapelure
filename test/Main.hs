@@ -10,7 +10,7 @@ import Prettyprinter (pretty)
 import Test.Hspec
 
 import Chapelure
-import Chapelure.Handler.Colourful qualified as PT
+import qualified Chapelure.Handler.Colourful as PT
 import Chapelure.Types
 
 main :: IO ()
@@ -67,7 +67,7 @@ spec = do
               }
       let rendered =
             [s|
-[L342]: Error: 
+[L342]: Error:
 Did you check all the types of your arguments?
 https://localhost:8888/help/code/L342
 |]
@@ -92,7 +92,7 @@ https://localhost:8888/help/code/L342
               }
       let rendered =
             [s|
-[L342]: Error: 
+[L342]: Error:
  /[Code.hs:1:10] 
  | 
 1| add :: Int
@@ -133,7 +133,7 @@ https://localhost:8888/help/code/L342
               }
       let rendered =
             [s|
-[L342]: Error: 
+[L342]: Error:
  /[Code.hs:3:1] 
  | 
 3| add :: Int
@@ -182,7 +182,7 @@ https://localhost:8888/help/code/L342
               }
       let rendered =
             [s|
-[L342]: Error: 
+[L342]: Error:
  /[Code.hs:3:1] 
  | 
 3| add :: Int

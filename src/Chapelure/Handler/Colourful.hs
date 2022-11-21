@@ -36,19 +36,19 @@ import Data.Foldable (Foldable (fold), toList)
 import Data.Functor ((<&>))
 import Data.List (mapAccumL)
 import Data.Map (Map)
-import Data.Map qualified as Map
+import qualified Data.Map as Map
 import Data.Maybe (fromMaybe, isJust, mapMaybe)
 import Data.Semigroup (Semigroup (stimes))
 import Data.Sequence (Seq (..))
-import Data.Sequence qualified as Seq
+import qualified Data.Sequence as Seq
 import Data.Set (Set)
-import Data.Set qualified as Set
+import qualified Data.Set as Set
 import Data.Text (Text)
-import Data.Text qualified as T
+import qualified Data.Text as T
 import Data.Text.Display (display)
 import Data.Vector (Vector)
-import Data.Vector qualified as V
-import Data.Vector.NonEmpty qualified as DVNE
+import qualified Data.Vector as V
+import qualified Data.Vector.NonEmpty as DVNE
 import HSLuv
   ( HSLuv (HSLuv)
   , HSLuvHue (HSLuvHue)
@@ -335,7 +335,18 @@ buildGutter lo s e lines' = (fromIntegral pad, body)
       Seq.zip [s .. e] (Seq.fromList $ toList lines') >>= \(i, line) ->
         fmap (\r -> RenderLine (Numbered i) [] 0 r Nothing) (buildDoc padded line)
 
-buildGutter' :: Bool -> Style -> LayoutOptions -> Maybe Text -> Line -> Column -> Line -> Vector DocText -> Maybe DocText -> Maybe Text -> (Word, Seq RenderLine)
+buildGutter'
+  :: Bool
+  -> Style
+  -> LayoutOptions
+  -> Maybe Text
+  -> Line
+  -> Column
+  -> Line
+  -> Vector DocText
+  -> Maybe DocText
+  -> Maybe Text
+  -> (Word, Seq RenderLine)
 buildGutter' isFinal linkStyle lo source s sc e lines' me li =
   ( pad
   , go (Header source s sc)
@@ -433,7 +444,7 @@ render config (Diagnostic co se me he li snip) =
         co <&> \co' ->
           annotate sgr $
             brackets (pretty co') <> ": "
-      label' = annotate sgr $ pretty (show se) <> ": "
+      label' = annotate sgr $ pretty (show se) <> ":"
       mess = fromMaybe mempty me <> hardline
       snips :: Vector Snippet
       snips = maybe mempty DVNE.toVector snip

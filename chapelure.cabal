@@ -10,7 +10,7 @@ synopsis:           A diagnostics library for Haskell
 description:        Chapelure is a diagnostics library for Haskell.
 license:            MIT
 build-type:         Simple
-tested-with:        GHC ==9.2.4
+tested-with:        GHC ==8.10.7 || ==9.2.4
 extra-source-files:
   CHANGELOG.md
   LICENSE
@@ -37,7 +37,6 @@ common common-extensions
     MultiParamTypeClasses
     NamedFieldPuns
     OverloadedLabels
-    OverloadedRecordDot
     OverloadedStrings
     RankNTypes
     RecordWildCards
@@ -47,7 +46,7 @@ common common-extensions
     TypeApplications
     TypeOperators
 
-  default-language:   GHC2021
+  default-language:   Haskell2010
 
 common common-ghc-options
   ghc-options:
@@ -72,7 +71,7 @@ library
   --Chapelure.Errors
   build-depends:
     , ansi-terminal    ^>=0.11
-    , base             >=4.16  && <4.18
+    , base             >=4.14  && <4.18
     , colour           ^>=2.3
     , containers       ^>=0.6
     , hsluv-haskell    ^>=0.1
