@@ -23,12 +23,12 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: 'Set up HLint'
-      uses: rwe/actions-hlint-setup@v2
+      uses: haskell/actions/hlint-setup@v2
       with:
         version: '3.5'
 
     - name: 'Run HLint'
-      uses: rwe/actions-hlint-run@v2
+      uses:  haskell/actions/hlint-run@v2
       with:
         path: '["src/", "test/"]'
         fail-on: warning
