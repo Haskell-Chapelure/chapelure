@@ -2,5 +2,3 @@ packages: ./
 
 tests: True
 documentation: True
-
-index-state: 2021-11-02T19:41:35Z

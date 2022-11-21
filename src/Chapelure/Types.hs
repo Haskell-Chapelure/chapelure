@@ -9,21 +9,21 @@ import GHC.Generics (Generic)
 import Prettyprinter (Pretty)
 
 data Diagnostic = Diagnostic
-  { -- | Unique diagnostic code that be used to look up more information.
-    -- Should be globally unique, and documented for easy searching.
-    code :: Maybe Text,
-    -- | Diagnostic severity, this may be used by the Report Handler
-    -- to adapt the formatting of the diagnostic.
-    severity :: Severity,
-    -- | A short description of the diagnostic. Rendered at the top.
-    message :: Maybe DocText,
-    -- | Additional free-form text for the poor bastard at the end of it all. Rendered at the bottom
-    help :: Maybe DocText,
-    -- | Link to visit for a more detailed explanation.
-    -- Can make use of the 'code' component.
-    link :: Maybe Text,
-    -- | Contextual snippet to provide relevant source data.
-    snippets :: Maybe (NonEmptyVector Snippet)
+  { code :: Maybe Text
+  -- ^ Unique diagnostic code that be used to look up more information.
+  -- Should be globally unique, and documented for easy searching.
+  , severity :: Severity
+  -- ^ Diagnostic severity, this may be used by the Report Handler
+  -- to adapt the formatting of the diagnostic.
+  , message :: Maybe DocText
+  -- ^ A short description of the diagnostic. Rendered at the top.
+  , help :: Maybe DocText
+  -- ^ Additional free-form text for the poor bastard at the end of it all. Rendered at the bottom
+  , link :: Maybe Text
+  -- ^ Link to visit for a more detailed explanation.
+  -- Can make use of the 'code' component.
+  , snippets :: Maybe (NonEmptyVector Snippet)
+  -- ^ Contextual snippet to provide relevant source data.
   }
   deriving stock (Show, Generic)
 
@@ -67,22 +67,22 @@ incrementColumn (Column i) = Column (i + 1)
 
 -- | A datatype holding a message, some source data and a span to highlight.
 data Snippet = Snippet
-  { -- | A location name (filename or other), and the line and columns
-    -- at which the snippet starts.
-    location :: (Maybe Text, Line, Column),
-    -- | Highlights of the source that are of interest
-    highlights :: Maybe (NonEmptyVector Highlight),
-    -- | Subject that is being reported. Each member is a line.
-    content :: Vector DocText
+  { location :: (Maybe Text, Line, Column)
+  -- ^ A location name (filename or other), and the line and columns
+  -- at which the snippet starts.
+  , highlights :: Maybe (NonEmptyVector Highlight)
+  -- ^ Highlights of the source that are of interest
+  , content :: Vector DocText
+  -- ^ Subject that is being reported. Each member is a line.
   }
   deriving stock (Show, Generic)
 
 -- | A piece of source data that is shown when reporting an error.
 -- Pointers on a source are always on a single line.
 data Highlight = Highlight
-  { -- | An optional label for the highlight
-    label :: Maybe DocText,
-    -- | Where the highlight is
-    spans :: NonEmptyVector (Line, Column, Column)
+  { label :: Maybe DocText
+  -- ^ An optional label for the highlight
+  , spans :: NonEmptyVector (Line, Column, Column)
+  -- ^ Where the highlight is
   }
   deriving stock (Show, Generic)
