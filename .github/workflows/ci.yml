@@ -32,7 +32,7 @@ jobs:
     - name: Freeze
       run: cabal freeze
  
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       name: Cache ~/.cabal/store
       with:
         path: ~/.cabal/store
