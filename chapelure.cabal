@@ -78,7 +78,7 @@ library
     , nonempty-vector  ^>=0.2
     , optics-core      ^>=0.4
     , prettyprinter    ^>=1.7
-    , text             ^>=1.2
+    , text             ^>=2.0
     , text-display     ^>=0.0
     , vector           ^>=0.13
 
